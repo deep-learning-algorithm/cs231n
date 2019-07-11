@@ -1,2 +1,2 @@
 # cs231n
-保存cs231n课程作业及相关文档
+保存stanford [cs231n]([cs231n](http://cs231n.github.io/))课程作业及相关文档
