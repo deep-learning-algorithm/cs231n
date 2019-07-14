@@ -39,12 +39,12 @@ def softmax_loss_naive(W, X, y, reg):
     scores = X.dot(W)
     scores -= np.atleast_2d(np.max(scores, axis=1)).T
     exp_scores = np.exp(scores)
-    softmax_scores = exp_scores / np.atleast_2d(np.sum(exp_scores, axis=1)).T
+    probs = exp_scores / np.atleast_2d(np.sum(exp_scores, axis=1)).T
     
-    loss = -1 / num_trains * np.sum(np.log(softmax_scores[range(num_trains), y]))
+    loss = -1 / num_trains * np.sum(np.log(probs[range(num_trains), y]))
     loss += reg * np.sum(W**2)
     
-    dscores = softmax_scores
+    dscores = probs
     dscores[range(num_trains), y] -= 1
     dscores /= num_trains
     
