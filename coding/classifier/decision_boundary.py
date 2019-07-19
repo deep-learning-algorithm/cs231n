@@ -66,16 +66,7 @@ def pca(X, ratio=0.99, **kwargs):
     return y, p
 
 
-if __name__ == '__main__':
-    iris_path = '/home/zj/data/iris-species/Iris.csv'
-    x_train, x_test, y_train, y_test = load_iris(iris_path)
-
-    # 零中心
-    mu = np.mean(x_train, axis=0)
-    x_train = x_train - mu
-    # 训练分类器
-    classifier = NN([20, 20], input_dim=4, num_classes=3, learning_rate=5e-2, reg=1e-3)
-    classifier.train(x_train, y_train, num_iters=5000, batch_size=120, verbose=True)
+def draw_decision_boundary(classifier, x_test, y_test):
     # PCA降维
     y, p = pca(x_test, k=2)
     # 编辑网络，预测结果
@@ -83,7 +74,6 @@ if __name__ == '__main__':
     y_min, y_max = p[1].min() - 0.05, p[1].max() + 0.05
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.001), np.arange(y_min, y_max, 0.001))
     x_grid = np.vstack((xx.reshape(-1), yy.reshape(-1))).T.dot(y)
-    x_grid = x_grid - mu
     y_pred = classifier.predict(x_grid).reshape(xx.shape)
     # 绘制等高轮廓
     plt.contourf(xx, yy, y_pred, cmap=mpl.cm.jet)
@@ -95,3 +85,20 @@ if __name__ == '__main__':
     plt.scatter(p[0, indexs_1], p[1, indexs_1], c='g', marker='8')
     plt.scatter(p[0, indexs_2], p[1, indexs_2], c='y', marker='*')
     plt.show()
+
+
+if __name__ == '__main__':
+    iris_path = '/home/zj/data/iris-species/Iris.csv'
+    x_train, x_test, y_train, y_test = load_iris(iris_path)
+
+    mu = np.mean(x_train, axis=0)
+    var = np.var(x_train, axis=0)
+    eps = 1e-8
+    x_train = (x_train - mu) / np.sqrt(var + eps)
+    x_test = (x_test - mu) / np.sqrt(var + eps)
+
+    # 训练分类器
+    classifier = NN([100, 60], input_dim=4, num_classes=3, learning_rate=1e-1, reg=1e-3)
+    classifier.train(x_train, y_train, num_iters=30000, batch_size=200, verbose=True)
+
+    draw_decision_boundary(classifier, x_test, y_test)

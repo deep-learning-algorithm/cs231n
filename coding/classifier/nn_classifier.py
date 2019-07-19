@@ -63,28 +63,33 @@ class NN(object):
 
         # Run stochastic gradient descent to optimize W
         loss_history = []
+        range_list = np.arange(0, num_train, step=batch_size)
         for it in range(num_iters):
-            indices = np.random.choice(num_train, batch_size)
-            X_batch = X[indices]
-            y_batch = y[indices]
+            total_loss = 0
+            for i in range_list:
+                X_batch = X[i:i + batch_size]
+                y_batch = y[i:i + batch_size]
 
-            # evaluate loss and gradient
-            loss, grads = self.loss(X_batch, y_batch)
-            loss_history.append(loss)
+                # evaluate loss and gradient
+                loss, grads = self.loss(X_batch, y_batch)
+                total_loss += loss
 
-            for k in self.params.keys():
-                #     config = self.configs[k]
-                w = self.params[k]
-                dw = grads[k]
+                for k in self.params.keys():
+                    #     config = self.configs[k]
+                    w = self.params[k]
+                    dw = grads[k]
 
-                # next_w, next_config = self.adam(w, dw, config)
-                next_w = w - self.lr * dw
+                    # next_w, next_config = self.adam(w, dw, config)
+                    next_w = w - self.lr * dw
 
-                self.params[k] = next_w
-                # self.configs[k] = config
+                    self.params[k] = next_w
+                    # self.configs[k] = config
+
+            avg_loss = total_loss / len(range_list)
+            loss_history.append(avg_loss)
 
             if verbose and it % 100 == 0:
-                print('iteration %d / %d: loss %f' % (it, num_iters, loss))
+                print('iteration %d / %d: loss %f' % (it, num_iters, avg_loss))
 
         return loss_history
 
