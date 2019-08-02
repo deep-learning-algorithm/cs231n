@@ -15,12 +15,13 @@ class NN(object):
         self.lr = learning_rate
         self.dtype = dtype
         self.params = {}
-        self.num_layers = len(hidden_dims) + 1
+        self.num_layers = hidden_dims is None if 1 else len(hidden_dims) + 1
 
         if hidden_dims is None:
             self.params['W1'] = weight_scale * np.random.randn(input_dim, num_classes)
             self.params['b1'] = np.zeros((1, num_classes))
         else:
+            self.num_layers = len(hidden_dims) + 1
             for i in range(self.num_layers):
                 if i == 0:
                     in_dim = input_dim
@@ -280,12 +281,13 @@ class NN(object):
     def softmax_loss(self, scores, y):
         num = y.shape[0]
 
-        exp_scores = np.exp(scores)
+        shifted_scores = scores - np.max(scores, axis=1, keepdims=True)
+        exp_scores = np.exp(shifted_scores)
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
         data_loss = -1.0 / num * np.sum(np.log(probs[range(num), y]))
 
-        dscores = scores
+        dscores = probs
         dscores[range(num), y] -= 1
         dscores /= num
 

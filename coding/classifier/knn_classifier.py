@@ -80,14 +80,14 @@ class KNN(object):
 
     def predict(self, X, k=1):
         """
-        Predict labels for test data using this classifier.
+        Predict labels for tests data using this classifier.
         Inputs:
-        - X: A numpy array of shape (num_test, D) containing test data consisting
+        - X: A numpy array of shape (num_test, D) containing tests data consisting
              of num_test samples each of dimension D.
         - k: The number of nearest neighbors that vote for the predicted labels.
         Returns:
         - y: A numpy array of shape (num_test,) containing predicted labels for the
-          test data, where y[i] is the predicted label for the test point X[i].
+          tests data, where y[i] is the predicted label for the tests point X[i].
         """
         dists = self._compute_distances(X)
 
@@ -95,7 +95,7 @@ class KNN(object):
 
     def _compute_distances(self, X):
         """
-        Compute the distance between each test point in X and each training point
+        Compute the distance between each tests point in X and each training point
         in self.X_train using no explicit loops.
         Input / Output: Same as compute_distances_two_loops
         """
@@ -108,14 +108,14 @@ class KNN(object):
 
     def _predict_labels(self, dists, k=1):
         """
-        Given a matrix of distances between test points and training points,
-        predict a label for each test point.
+        Given a matrix of distances between tests points and training points,
+        predict a label for each tests point.
         Inputs:
         - dists: A numpy array of shape (num_test, num_train) where dists[i, j]
-          gives the distance betwen the ith test point and the jth training point.
+          gives the distance betwen the ith tests point and the jth training point.
         Returns:
         - y: A numpy array of shape (num_test,) containing predicted labels for the
-          test data, where y[i] is the predicted label for the test point X[i].
+          tests data, where y[i] is the predicted label for the tests point X[i].
         """
         num_test = dists.shape[0]
         y_pred = np.zeros(num_test)
