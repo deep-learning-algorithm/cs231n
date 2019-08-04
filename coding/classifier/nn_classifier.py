@@ -5,20 +5,28 @@
 
 
 import numpy as np
+from classifier.weight_initialize import *
 
 
 class NN(object):
 
     def __init__(self, hidden_dims, input_dim=32 * 32 * 3, num_classes=10, weight_scale=1e-2, learning_rate=1e-3,
-                 reg=0.0, dtype=np.float64):
+                 reg=0.0, dtype=np.float64, weight_init=0):
         self.reg = reg
         self.lr = learning_rate
         self.dtype = dtype
         self.params = {}
         self.num_layers = hidden_dims is None if 1 else len(hidden_dims) + 1
 
+        if weight_init == 1:
+            weight_initialize_method = weight_initialize_v2
+        elif weight_init == 2:
+            weight_initialize_method = weight_initialize_v3
+        else:
+            weight_initialize_method = weight_initialize_v1
+
         if hidden_dims is None:
-            self.params['W1'] = weight_scale * np.random.randn(input_dim, num_classes)
+            self.params['W1'] = weight_initialize_method(input_dim, num_classes, weight_scale=weight_scale)
             self.params['b1'] = np.zeros((1, num_classes))
         else:
             self.num_layers = len(hidden_dims) + 1
@@ -33,7 +41,7 @@ class NN(object):
                     in_dim = hidden_dims[i - 1]
                     out_dim = hidden_dims[i]
 
-                self.params['W%d' % (i + 1)] = weight_scale * np.random.randn(in_dim, out_dim)
+                self.params['W%d' % (i + 1)] = weight_initialize_method(in_dim, out_dim, weight_scale=weight_scale)
                 self.params['b%d' % (i + 1)] = np.zeros((1, out_dim))
 
         self.configs = {}
@@ -76,20 +84,20 @@ class NN(object):
                 total_loss += loss
 
                 for k in self.params.keys():
-                    #     config = self.configs[k]
+                    config = self.configs[k]
                     w = self.params[k]
                     dw = grads[k]
 
-                    # next_w, next_config = self.adam(w, dw, config)
-                    next_w = w - self.lr * dw
+                    next_w, next_config = self.adam(w, dw, config)
+                    # next_w = w - self.lr * dw
 
                     self.params[k] = next_w
-                    # self.configs[k] = config
+                    self.configs[k] = next_config
 
             avg_loss = total_loss / len(range_list)
             loss_history.append(avg_loss)
 
-            if verbose and it % 100 == 0:
+            if verbose and it % 10 == 0:
                 print('iteration %d / %d: loss %f' % (it, num_iters, avg_loss))
 
         return loss_history
@@ -283,6 +291,9 @@ class NN(object):
 
         shifted_scores = scores - np.max(scores, axis=1, keepdims=True)
         exp_scores = np.exp(shifted_scores)
+        if np.sum(exp_scores <= 0) > 0:
+            # 存在成绩为0的情况下
+            exp_scores += 1e-8
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
         data_loss = -1.0 / num * np.sum(np.log(probs[range(num), y]))
