@@ -117,6 +117,7 @@ class NN(object):
           class.
         """
         scores, caches = self.forward(X)
+        scores -= np.atleast_2d(np.max(scores, axis=1)).T
         exp_scores = np.exp(scores)
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
