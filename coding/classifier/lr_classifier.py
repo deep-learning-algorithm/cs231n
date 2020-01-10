@@ -95,10 +95,13 @@ class LogisticClassifier(object):
         - loss as a single float
         - gradient with respect to self.W; an array of the same shape as W
         """
+        eplison = 1e-5
         num_train = X_batch.shape[0]
 
         scores = self.logistic_regression(X_batch)
-        data_loss = -1.0 / num_train * np.sum(y_batch * np.log(scores) + (1 - y_batch) * np.log(1 - scores))
+        data_loss = -1.0 / num_train * \
+                    np.sum(y_batch * np.log(np.maximum(scores, eplison)) + (1 - y_batch) * np.log(
+                        np.maximum(1 - scores, eplison)))
         reg_loss = 0.5 * reg * np.sum(self.W ** 2)
 
         loss = data_loss + reg_loss
